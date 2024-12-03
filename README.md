@@ -14,3 +14,5 @@ Directions:
 3. Dry Run the Migrate-SecurityGroupsCommands.ps1 from Powershell. It will prompt you for your source and target Active Directory login credentials necessary to read from the source domain, and write to the target. Use the -TestMode switch to do a dry run and review the output and missing security group and users reports located in the same directoy as the scripts.
 4. Run the script again removing the -TestMode to write the Security Groups and Members to your target domain directory.
 
+As always with anything out in the open, USE AT YOUR OWN RISK.
+
