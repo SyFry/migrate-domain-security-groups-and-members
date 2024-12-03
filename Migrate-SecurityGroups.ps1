@@ -255,21 +255,29 @@ function Process-SecurityGroups {
                 if (!$TestMode -and $targetGroup) {
                     $processedUsers = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
                     
+                    Write-Log "Getting members of source group $groupName" "DEBUG"
+                    $sourceMembers = Get-ADGroupMember -Identity $groupName -Server $SourceDC -Credential $sourceCredential
+                    Write-Log "Found $($sourceMembers.Count) members in source group" "DEBUG"
+                    
                     foreach ($member in $sourceMembers) {
+                        Write-Log "Processing member: $($member.SamAccountName)" "DEBUG"
                         if ($processedUsers.Add($member.SamAccountName)) {
                             try {
+                                Write-Log "Looking for user $($member.SamAccountName) in target domain" "DEBUG"
                                 $targetUser = Get-ADUser -Identity $member.SamAccountName `
                                     -Server $TargetDC `
                                     -Credential $targetCredential
                                 
-                                Add-ADGroupMember -Identity $targetGroup `
+                                Write-Log "Found user in target domain, adding to group" "DEBUG"
+                                Add-ADGroupMember -Identity $groupName `
                                     -Members $targetUser `
                                     -Server $TargetDC `
                                     -Credential $targetCredential
                                 
-                                Write-Log "Added user $($member.SamAccountName) to group $groupName"
+                                Write-Log "Successfully added user $($member.SamAccountName) to group $groupName"
                             }
                             catch {
+                                Write-Log "Error details: $_" "DEBUG"
                                 if (!$missingUsers.ContainsKey($groupName)) {
                                     $missingUsers[$groupName] = [System.Collections.Generic.HashSet[string]]::new()
                                 }
